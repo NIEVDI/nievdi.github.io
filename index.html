@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+        color: #5d3fd3;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+    th, td {
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #5d3fd3;
+        color: white;
+    }
+    .leader {
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #e0d6ff;
+        border-left: 4px solid #5d3fd3;
+    }
+    #newUserForm, #updateTasksForm {
+        margin-top: 20px;
+    }
+    label, input, button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    input, button {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    button {
+        background-color: #5d3fd3;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #4c31b0;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Таблица лидеров</h1>
+    <div class="leader" id="leader"></div>
+
+    <h2>Добавить нового ученика</h2>
+    <form id="newUserForm">
+        <label for="userName">Имя:</label>
+        <input type="text" id="userName" required>
+        <label for="userTasks">Количество решенных заданий:</label>
+        <input type="number" id="userTasks" required>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <h2>Обновить количество задач</h2>
+    <form id="updateTasksForm">
+        <label for="updateName">Имя:</label>
+        <input type="text" id="updateName" required>
+        <label for="updateTasks">Новое кол-во решенных задач:</label>
+        <input type="number" id="updateTasks" required>
+        <button type="submit">Обновить</button>
+    </form>
+
+    <h2>Ученики</h2>
+    <table id="userTable">
+        <tr>
+            <th>Имя</th>
+            <th>Решенно задач</th>
+        </tr>
+        <!-- Users will be inserted here -->
+    </table>
+</div>
+
+<script>
+// Initial array of users
+let users = [];
+
+// Function to render users to the table
+function renderUsers() {
+    const table = document.getElementById('userTable');
+    const leaderDiv = document.getElementById('leader');
+    let leader = { name: "No leader yet", tasks: 0 };
+
+    // Empty the table except the first row (headers)
+    table.innerHTML = `<tr>
+        <th>Name</th>
+        <th>Tasks Completed</th>
+    </tr>`;
+
+    // Iterate over the users array and create table rows
+    users.forEach(user => {
+        const row = `<tr>
+            <td>${user.name}</td>
+            <td>${user.tasks}</td>
+        </tr>`;
+        table.innerHTML += row;
+
+        // Determine the leader
+        if (user.tasks > leader.tasks) {
+            leader = user;
+        }
+    });
+
+    // Update the leader div
+    leaderDiv.textContent = `Leader: ${leader.name} with ${leader.tasks} tasks completed`;
+}
+
+// Function to save users to localStorage
+function saveUsers() {
+    localStorage.setItem('users', JSON.stringify(users));
+}
+
+// Function to load users from localStorage
+function loadUsers() {
+    const usersStr = localStorage.getItem('users');
+    return usersStr ? JSON.parse(usersStr) : [];
+}
+
+users = loadUsers();
+
+// Add new user
+document.getElementById('newUserForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const userName = document.getElementById('userName').value;
+    const userTasks = parseInt(document.getElementById('userTasks').value, 10);
+
+    // Add user to the array
+    users.push({ name: userName, tasks: userTasks });
+    renderUsers();
+
+    // Clear the form fields
+    document.getElementById('userName').value = '';
+    document.getElementById('userTasks').value = '';
+    saveUsers();
+});
+
+// Update user tasks
+document.getElementById('updateTasksForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const updateName = document.getElementById('updateName').value;
+    const updateTasks = parseInt(document.getElementById('updateTasks').value, 10);
+
+    // Find the user and update their tasks
+    const user = users.find(u => u.name === updateName);
+    if (user) {
+        user.tasks = updateTasks;
+    } else {
+        alert('User not found!');
+    }
+    renderUsers();
+
+    // Clear the form fields
+    document.getElementById('updateName').value = '';
+    document.getElementById('updateTasks').value = '';
+    saveUsers;
+});
+
+// Initial render
+renderUsers();
+</script>
+</body>
+</html>
